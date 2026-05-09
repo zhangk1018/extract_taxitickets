@@ -1,8 +1,6 @@
 # extract_taxitickets
 
 ```markdown
-# 🚕 高德打车电子行程单批量提取工具
-
 ## 📖 项目简介
 本项目是一个基于 Python 的自动化数据处理工具，专为批量解析**高德打车/方舟行/携华出行电子行程单（PDF）**而设计。通过精确的 PDF 坐标映射与智能文本清洗算法，自动提取财务报销所需的 6 项核心字段，并一键生成结构化 Excel 表格。完美兼容 PDF 导出时常见的**空格缺失、地址跨行、字段粘连**等复杂排版问题。
 
@@ -20,12 +18,12 @@ pip install -r requirements.txt
 ```
 
 ## 🚀 快速使用
-1. **放置文件**：将需要处理的 PDF 行程单统一放入 `aider-repository/taxiticket/` 目录下。
+1. **放置文件**：将需要处理的 PDF 行程单统一放入 `taxiticket/` 目录下。
 2. **运行程序**：
 ```bash
 python extract_taxi_receipts.py
 ```
-3. **获取结果**：程序执行完毕后，同级目录将自动生成 `高德打车行程单汇总.xlsx`。
+3. **获取结果**：程序执行完毕后，同级目录将自动生成 `taxiticket.xlsx`。
 
 ## 🧠 核心处理逻辑
 本工具摒弃了传统的“按行切割+空格分割”脆弱逻辑，采用 **坐标锚定 + 智能聚合 + 正则兜底** 的工业级解析方案：
@@ -87,7 +85,7 @@ MIT License
 
 ### 📌 提交建议
 1. 将主程序命名为 `extract_taxi_receipts.py`（或您喜欢的名称）。
-2. 保持 `aider-repository/taxiticket/` 目录结构，方便直接 `git commit`。
+2. 保持 `taxiticket/` 目录结构，方便直接 `git commit`。
 3. 可在 GitHub 仓库添加 `.gitignore` 排除生成的 `*.xlsx` 和 `__pycache__/`，保持仓库整洁。
 
 如需添加 CI/CD 自动化测试脚本、GUI 界面或支持更多平台（如滴滴/曹操），可随时告知，我将为您扩展。祝您开源顺利！🚀
