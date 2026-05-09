@@ -6,7 +6,6 @@ import pandas as pd
 
 def extract_travel_year(text):
     """精准提取行程真实年份，避开申请日期/打印日期干扰"""
-    # 定向匹配“行程时间”或“行程起止日期”后的第一个四位年份
     match = re.search(r'行程[时间起止日期]*[：:]\s*(\d{4})', text)
     return match.group(1) if match else "2025"
 
@@ -24,11 +23,9 @@ def process_pdf(pdf_path):
             lines.setdefault(round(w['top'], 1), []).append(w)
         sorted_ys = sorted(lines.keys())
 
-        # 提取全文头部文本，精准获取行程年份
         full_text = " ".join(w['text'] for w in words)
         year_prefix = extract_travel_year(full_text)
 
-        # 2. 定位表头行
         header_y = None
         for y in sorted_ys:
             txt = " ".join(w['text'] for w in lines[y])
@@ -40,7 +37,6 @@ def process_pdf(pdf_path):
         header_words = sorted(lines[header_y], key=lambda x: x['x0'])
         header_x0 = header_words[0]['x0']
 
-        # 🎯 获取关键列的X中心坐标
         std_cols = ['上车时间', '城市', '起点', '终点', '金额']
         col_centers = {}
         for w in header_words:
@@ -50,7 +46,6 @@ def process_pdf(pdf_path):
                     col_centers[sc] = (w['x0'] + w['x1']) / 2.0
                     break
 
-        # 📐 动态计算列边界中线
         sorted_centers = sorted(col_centers.items(), key=lambda x: x[1])
         boundaries = {}
         for i in range(len(sorted_centers) - 1):
@@ -62,7 +57,6 @@ def process_pdf(pdf_path):
             elif col1 == '起点': boundaries['start_end'] = mid
             elif col1 == '终点': boundaries['end_amount'] = mid
 
-        # 3. 数据行解析（状态机聚合多行）
         current_rec = {'上车时间': '', '城市': '', '起点': '', '终点': '', '金额': ''}
         is_active = False
 
@@ -77,7 +71,6 @@ def process_pdf(pdf_path):
                 current_rec = {k: '' for k in current_rec}
             if is_new_row: is_active = True
 
-            # 📍 X坐标边界归类
             for w in lines[y]:
                 cx = (w['x0'] + w['x1']) / 2.0
                 if cx < boundaries.get('time_city', 300):
@@ -94,21 +87,17 @@ def process_pdf(pdf_path):
         if is_active and current_rec['金额'].strip():
             records.append(current_rec)
 
-    # 4. 数据清洗（兼容双格式，修复年份提取）
     clean_data = []
     for rec in records:
         if not rec['金额'].strip(): continue
 
         left_combined = rec['上车时间'].strip() + " " + rec['城市'].strip()
-        
-        # 兼容 YYYY-MM-DD 与 MM-DD
         dt_yyyy = re.search(r'(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})', left_combined)
         dt_mmdd = re.search(r'(\d{2}-\d{2})\s+(\d{2}:\d{2})', left_combined)
         
         if dt_yyyy:
             date_val, time_val = dt_yyyy.group(1), dt_yyyy.group(2)
         elif dt_mmdd:
-            # ✅ 使用精准提取的行程年份拼接
             date_val = f"{year_prefix}-{dt_mmdd.group(1)}"
             time_val = dt_mmdd.group(2)
         else:
@@ -117,7 +106,6 @@ def process_pdf(pdf_path):
         city_match = re.search(r'([\u4e00-\u9fa5]+市)', left_combined)
         city_val = city_match.group(1) if city_match else rec['城市'].strip()
         
-        # 金额取最后一个带小数的数字，避开里程/页码干扰
         amt_list = re.findall(r'\d+\.\d+', rec['金额'])
         amt_val = float(amt_list[-1]) if amt_list else 0.0
 
@@ -133,14 +121,18 @@ def process_pdf(pdf_path):
     return clean_data, header_x0
 
 def main():
-    target_dir = os.path.join("aider-repository", "taxiticket")
+    # 📍 核心修改1：路径指向脚本同级目录下的 taxiticket 文件夹
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    target_dir = os.path.join(script_dir, "taxiticket")
+    
+    # 自动创建目录（若不存在）
     if not os.path.exists(target_dir):
-        print(f"❌ 目录不存在: {target_dir}")
-        return
+        os.makedirs(target_dir, exist_ok=True)
+        print(f"📁 已自动创建目录: {target_dir}")
 
     pdf_files = glob.glob(os.path.join(target_dir, "*.pdf"))
     if not pdf_files:
-        print(f"⚠️ 未找到 PDF 文件。")
+        print(f"⚠️ 未在 {target_dir} 中找到 PDF 文件，请将行程单放入该目录后重试。")
         return
 
     all_records = []
@@ -158,7 +150,8 @@ def main():
         cols = ['日期', '时间', '城市', '起点', '终点', '金额']
         df = df[cols]
 
-        output_path = os.path.join(target_dir, "网约车行程单汇总.xlsx")
+        # 📍 核心修改2：输出文件名固定为 taxiticket.xlsx
+        output_path = os.path.join(target_dir, "taxiticket.xlsx")
         df.to_excel(output_path, index=False, float_format="%.2f")
         print(f"\n🎉 成功！Excel 已保存至: {output_path}")
     else:
@@ -166,4 +159,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
