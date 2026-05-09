@@ -17,12 +17,12 @@ pip install -r requirements.txt
 ```
 
 ## 🚀 快速使用
-1. **放置文件**：将需要处理的 PDF 行程单统一放入 `taxiticket/` 目录下。
+1. **放置文件**：将需要处理的PDF行程单统一放入 `taxiticket/` 目录下。
 2. **运行程序**：
 ```bash
 python extract_taxi_receipts.py
 ```
-3. **获取结果**：程序执行完毕后，同级目录将自动生成 `taxiticket.xlsx`。
+3. **获取结果**：程序执行完毕后，保存在PDF行程单同级目录，文件名为 `taxiticket.xlsx`。
 
 ## 🧠 核心处理逻辑
 本工具摒弃了传统的“按行切割+空格分割”脆弱逻辑，采用 **坐标锚定 + 智能聚合 + 正则兜底** 的工业级解析方案：
