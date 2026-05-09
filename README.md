@@ -43,11 +43,10 @@ python extract_taxi_receipts.py
 ├── extract_taxi_receipts.py   # 主程序
 ├── requirements.txt           # 依赖清单
 ├── README.md                  # 说明文档
-└── aider-repository/
-    └── taxiticket/            # 📥 放入 PDF 的目录
-        ├── 【方舟行-119.00元...】.pdf
-        ├── 【携华出行-47.49元...】.pdf
-        └── 高德打车行程单汇总.xlsx  # 📤 自动生成结果
+└── taxiticket/            # 📥 放入 PDF 的目录
+    ├── 【方舟行-119.00元...】.pdf
+    ├── 【携华出行-47.49元...】.pdf
+    └── 高德打车行程单汇总.xlsx  # 📤 自动生成结果
 ```
 
 ## ⚠️ 注意事项
