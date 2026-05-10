@@ -62,6 +62,22 @@ MIT License
 
 ---
 
+## 企业级发布命令（含图标/防报错优化）
+将准备好的 .ico 图标文件（如 app.ico）放到项目根目录 C:\extract_taxitickets\ 下，运行：
+cd C:\extract_taxitickets
+C:\Users\<your_name>\AppData\Local\Programs\Python\Python311\python.exe -m PyInstaller ^
+  --onefile ^
+  --clean ^
+  --name "extract_taxitickets" ^
+  --icon "app.ico" ^
+  --hidden-import tkinter ^
+  --hidden-import pdfplumber ^
+  --hidden-import pandas ^
+  --hidden-import openpyxl ^
+  --add-data "taxiticket;taxiticket" ^
+  extract_taxi_receipts.py
+
+
 ### 🧩 程序逻辑精要说明（供 GitHub Issues/Wiki 或代码注释参考）
 
 ```python
