@@ -1,8 +1,11 @@
 import os
 import re
 import glob
+import sys
 import pdfplumber
 import pandas as pd
+import tkinter as tk
+from tkinter import filedialog
 
 def extract_travel_year(text):
     """精准提取行程真实年份，避开申请日期/打印日期干扰"""
@@ -127,10 +130,29 @@ def process_pdf(pdf_path):
     return clean_data, header_x0
 
 def main():
-    script_dir = os.path.dirname(os.path.abspath(__file__))
+    # 🔧 智能获取 exe 或脚本所在目录（兼容打包后运行）
+    if getattr(sys, 'frozen', False):
+        script_dir = os.path.dirname(sys.executable)
+    else:
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+
     target_dir = os.path.join(script_dir, "taxiticket")
-    if not os.path.exists(target_dir):
-        os.makedirs(target_dir, exist_ok=True)
+    
+    # 🔍 检查默认目录是否存在且包含 PDF
+    default_valid = os.path.exists(target_dir) and len(glob.glob(os.path.join(target_dir, "*.pdf"))) > 0
+
+    if not default_valid:
+        print("⚠️ 未检测到默认 'taxiticket' 文件夹或其中无PDF，请选择行程单所在目录...")
+        # 🖥️ 调用系统原生文件夹选择对话框
+        root = tk.Tk()
+        root.withdraw()  # 隐藏 tkinter 主窗口
+        target_dir = filedialog.askdirectory(title="请选择行程单所在目录")
+        root.destroy()
+        
+        if not target_dir:
+            print("❌ 未选择文件夹，程序退出。")
+            return
+        print(f"✅ 已选择目录: {target_dir}")
 
     pdf_files = glob.glob(os.path.join(target_dir, "*.pdf"))
     if not pdf_files:
@@ -152,6 +174,7 @@ def main():
         cols = ['日期', '时间', '城市', '起点', '终点', '金额']
         df = df[cols]
 
+        # 💾 Excel 自动保存到用户选择的目录
         output_path = os.path.join(target_dir, "taxiticket.xlsx")
         df.to_excel(output_path, index=False, float_format="%.2f")
         print(f"\n🎉 成功！Excel 已保存至: {output_path}")
