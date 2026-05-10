@@ -17,6 +17,10 @@
 pip install -r requirements.txt
 ```
 
+### 🍎 macOS (Homebrew Python 用户)
+Homebrew 安装的 Python 默认不包含 tkinter 底层模块，请额外运行：
+brew install python-tk@3.14  # 版本号请与实际 Python 版本匹配
+
 ## 🚀 快速使用
 1. **放置文件**：将需要处理的PDF行程单统一放入 `taxiticket/` 目录下。
 2. **运行程序**：
