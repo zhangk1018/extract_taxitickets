@@ -156,7 +156,7 @@ def main():
 
     pdf_files = glob.glob(os.path.join(target_dir, "*.pdf"))
     if not pdf_files:
-        print(f"⚠️ 未在 {target_dir} 中找到 PDF 文件。")
+        print(f"⚠️ 未在 {target_dir} 中找到行程单。")
         return
 
     all_records = []
