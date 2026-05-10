@@ -142,7 +142,7 @@ def main():
     default_valid = os.path.exists(target_dir) and len(glob.glob(os.path.join(target_dir, "*.pdf"))) > 0
 
     if not default_valid:
-        print("⚠️ 未检测到默认 'taxiticket' 文件夹或其中无PDF，请选择行程单所在目录...")
+        print("⚠️ 未检测到默认 'taxiticket' 文件夹或其中无行程单，请选择行程单所在目录...")
         # 🖥️ 调用系统原生文件夹选择对话框
         root = tk.Tk()
         root.withdraw()  # 隐藏 tkinter 主窗口
