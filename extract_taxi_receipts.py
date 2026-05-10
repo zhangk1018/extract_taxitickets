@@ -9,6 +9,11 @@ def extract_travel_year(text):
     match = re.search(r'行程[时间起止日期]*[：:]\s*(\d{4})', text)
     return match.group(1) if match else "2025"
 
+def clean_address(text):
+    """🔧 新增：清除PDF解析产生的内部空格，符合标准中文地址格式"""
+    if not text: return ""
+    return re.sub(r'\s+', '', text).strip()
+
 def process_pdf(pdf_path):
     records = []
     header_x0 = None
@@ -87,6 +92,7 @@ def process_pdf(pdf_path):
         if is_active and current_rec['金额'].strip():
             records.append(current_rec)
 
+    # 4. 数据清洗（新增地址空格过滤）
     clean_data = []
     for rec in records:
         if not rec['金额'].strip(): continue
@@ -113,33 +119,29 @@ def process_pdf(pdf_path):
             '日期': date_val,
             '时间': time_val,
             '城市': city_val,
-            '起点': rec['起点'].strip(),
-            '终点': rec['终点'].strip(),
+            '起点': clean_address(rec['起点']),  # ✅ 应用空格清洗
+            '终点': clean_address(rec['终点']),  # ✅ 应用空格清洗
             '金额': amt_val
         })
         
     return clean_data, header_x0
 
 def main():
-    # 📍 核心修改1：路径指向脚本同级目录下的 taxiticket 文件夹
     script_dir = os.path.dirname(os.path.abspath(__file__))
     target_dir = os.path.join(script_dir, "taxiticket")
-    
-    # 自动创建目录（若不存在）
     if not os.path.exists(target_dir):
         os.makedirs(target_dir, exist_ok=True)
-        print(f"📁 已自动创建目录: {target_dir}")
 
     pdf_files = glob.glob(os.path.join(target_dir, "*.pdf"))
     if not pdf_files:
-        print(f"⚠️ 未在 {target_dir} 中找到 PDF 文件，请将行程单放入该目录后重试。")
+        print(f"⚠️ 未在 {target_dir} 中找到 PDF 文件。")
         return
 
     all_records = []
     for pdf_path in pdf_files:
         print(f"📄 解析: {os.path.basename(pdf_path)}")
         try:
-            recs, hdr_x = process_pdf(pdf_path)
+            recs, _ = process_pdf(pdf_path)
             all_records.extend(recs)
             print(f"   ✅ 提取 {len(recs)} 条")
         except Exception as e:
@@ -150,7 +152,6 @@ def main():
         cols = ['日期', '时间', '城市', '起点', '终点', '金额']
         df = df[cols]
 
-        # 📍 核心修改2：输出文件名固定为 taxiticket.xlsx
         output_path = os.path.join(target_dir, "taxiticket.xlsx")
         df.to_excel(output_path, index=False, float_format="%.2f")
         print(f"\n🎉 成功！Excel 已保存至: {output_path}")
