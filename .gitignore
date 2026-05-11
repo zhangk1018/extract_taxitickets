@@ -1,1 +1,14 @@
+# Python 缓存
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 项目生成文件
+*.pdf
+*.xlsx
+*.zip
 .DS_Store
+
+# 虚拟环境
+venv/
